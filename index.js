@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const User = require("./schemas/userSchema");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -32,6 +33,8 @@ const clientOptions = {
 async function run() {
   try {
     await mongoose.connect(uri, clientOptions);
+
+    const user = new User();
   } finally {
   }
 }
