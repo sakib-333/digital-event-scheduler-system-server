@@ -48,6 +48,7 @@ app.post("/users", async (req, res) => {
 });
 // Save user api ends
 
+// Send cookie starts
 app.post("/jwt", (req, res) => {
   const email = req.body;
   const token = jwt.sign({ email }, process.env.jwt_secret, {
@@ -62,6 +63,19 @@ app.post("/jwt", (req, res) => {
 
   res.send({ acknowledged: true, message: "Cookie saved" });
 });
+// Send cookie ends
+
+// Clear cookie when logged out start
+app.post("/logout", (req, res) => {
+  res.clearCookie("EVENT_SCHEDULER", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+  });
+
+  res.send({ acknowledged: true, message: "Cookie cleared" });
+});
+// Clear cookie when logged out end
 
 app.get("/", (req, res) => {
   res.send("Server is running...");
