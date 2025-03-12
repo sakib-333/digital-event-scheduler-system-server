@@ -18,6 +18,7 @@ app.use(
       "https://digital-event-scheduler-system.web.app",
       "https://digital-event-scheduler-system.firebaseapp.com",
     ],
+    credentials: true,
   })
 );
 
@@ -26,19 +27,24 @@ const db_password = process.env.db_password;
 
 const uri = `mongodb+srv://${db_username}:${db_password}@cluster0.ashqk.mongodb.net/EVENT_SCHEDULER?retryWrites=true&w=majority&appName=Cluster0`;
 
-const clientOptions = {
-  serverApi: { version: "1", strict: true, deprecationErrors: true },
-};
-
-async function run() {
-  try {
-    await mongoose.connect(uri, clientOptions);
-
-    const user = new User();
-  } finally {
-  }
+try {
+  mongoose.connect(uri);
+  console.log("Connected to db.");
+} catch {
+  console.log("Can not connect with db.");
 }
-run().catch(console.dir);
+
+app.post("/users", async (req, res) => {
+  try {
+    const userInfo = req.body;
+    const user = new User({ ...userInfo });
+
+    await user.save();
+    res.send({ acknowledged: true, message: "User saved successfully." });
+  } catch {
+    res.send({ acknowledged: false, message: "Can not save user." });
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("Server is running...");
