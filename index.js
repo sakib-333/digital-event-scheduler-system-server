@@ -34,6 +34,7 @@ try {
   console.log("Can not connect with db.");
 }
 
+// Save user api starts
 app.post("/users", async (req, res) => {
   try {
     const userInfo = req.body;
@@ -44,6 +45,22 @@ app.post("/users", async (req, res) => {
   } catch {
     res.send({ acknowledged: false, message: "Can not save user." });
   }
+});
+// Save user api ends
+
+app.post("/jwt", (req, res) => {
+  const email = req.body;
+  const token = jwt.sign({ email }, process.env.jwt_secret, {
+    expiresIn: "1h",
+  });
+
+  res.cookie("EVENT_SCHEDULER", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+  });
+
+  res.send({ acknowledged: true, message: "Cookie saved" });
 });
 
 app.get("/", (req, res) => {
