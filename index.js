@@ -34,6 +34,31 @@ try {
   console.log("Can not connect with db.");
 }
 
+const checkToken = (req, res, next) => {
+  const token = req?.cookies?.EVENT_SCHEDULER;
+
+  if (!token) {
+    return res.status(403).send({ message: "Unauthorized access" });
+  } else {
+    jwt.verify(token, process.env.jwt_secret, (err, decoded) => {
+      if (err) {
+        return res.status(403).send({ message: "Unauthorized access" });
+      }
+      req.decodedEmail = decoded.email.email;
+      next();
+    });
+  }
+};
+
+const checkUser = (req, res, next) => {
+  const { email } = req.body;
+
+  if (email !== req.decodedEmail) {
+    return res.status(403).send({ message: "Unauthorized access" });
+  }
+  next();
+};
+
 // Save user api starts
 app.post("/users", async (req, res) => {
   try {
@@ -76,6 +101,36 @@ app.post("/logout", (req, res) => {
   res.send({ acknowledged: true, message: "Cookie cleared" });
 });
 // Clear cookie when logged out end
+
+// get user info starts
+app.post("/user", checkToken, checkUser, async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const userInfo = await User.findOne({ email }).exec();
+    res.send(userInfo);
+  } catch (err) {
+    console.log(err);
+  }
+});
+// get user info ends
+
+// Get user type starts
+app.post("/user-type", checkToken, checkUser, async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const { userType = "general" } = await User.findOne(
+      { email },
+      "userType"
+    ).exec();
+
+    res.send(userType);
+  } catch (err) {
+    console.log(err);
+  }
+});
+// Get user type end
 
 app.get("/", (req, res) => {
   res.send("Server is running...");
