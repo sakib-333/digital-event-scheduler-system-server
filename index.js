@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const User = require("./schemas/userSchema");
+const Event = require("./schemas/eventSchema");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -131,6 +132,21 @@ app.post("/user-type", checkToken, checkUser, async (req, res) => {
   }
 });
 // Get user type end
+
+// Add event api starts
+app.post("/add-event", checkToken, checkUser, async (req, res) => {
+  try {
+    const { eventInfo } = req.body;
+    const event = new Event({ ...eventInfo });
+
+    await event.save();
+    res.send({ acknowledged: true, message: "Event saved successfully" });
+  } catch (err) {
+    console.log(err);
+    res.send({ acknowledged: false, message: "Something went wrong." });
+  }
+});
+// Add event api end
 
 app.get("/", (req, res) => {
   res.send("Server is running...");

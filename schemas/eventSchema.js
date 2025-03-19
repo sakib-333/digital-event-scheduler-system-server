@@ -11,7 +11,7 @@ const eventSchema = new Schema({
   },
   photo: {
     type: String,
-    default: "https://i.ibb.co.com/FLWX4bfj/Event-Default-Logo.png",
+    required: [true, "Photo is required"],
   },
   category: {
     type: String,
@@ -39,6 +39,10 @@ const eventSchema = new Schema({
     type: String,
     enum: ["approved", "pending"],
     default: "pending",
+  },
+  updatedAt: {
+    type: Date,
+    default: new Date(),
   },
 });
 
