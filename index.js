@@ -148,6 +148,21 @@ app.post("/add-event", checkToken, checkUser, async (req, res) => {
 });
 // Add event api end
 
+app.post("/my-events", checkToken, checkUser, async (req, res) => {
+  const { email } = req.body;
+  try {
+    const myEvents = await Event.find(
+      { author: email },
+      "photo title description date location category"
+    )
+      .sort({ updatedAt: -1 })
+      .exec();
+    res.send({ acknowledged: true, myEvents });
+  } catch (err) {
+    res.send({ acknowledged: false, myEvents: [] });
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("Server is running...");
 });
