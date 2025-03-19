@@ -163,6 +163,21 @@ app.post("/my-events", checkToken, checkUser, async (req, res) => {
   }
 });
 
+app.post("/my-event", checkToken, checkUser, async (req, res) => {
+  const { eventID } = req.body;
+  try {
+    const myEvent = await Event.findById(
+      eventID,
+      "title description participant category location date"
+    );
+
+    res.send({ acknowledged: true, myEvent });
+  } catch (err) {
+    res.send({ acknowledged: false, myEvent: {} });
+    console.log(err);
+  }
+});
+
 app.get("/", (req, res) => {
   res.send("Server is running...");
 });
