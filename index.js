@@ -168,7 +168,7 @@ app.post("/my-event", checkToken, checkUser, async (req, res) => {
   try {
     const myEvent = await Event.findById(
       eventID,
-      "title description participant category location date"
+      "title description participant category location date photo"
     );
 
     res.send({ acknowledged: true, myEvent });
@@ -177,6 +177,23 @@ app.post("/my-event", checkToken, checkUser, async (req, res) => {
     console.log(err);
   }
 });
+
+// Edit event api starts
+app.post("/edit-event", checkToken, checkUser, async (req, res) => {
+  try {
+    const { eventID, updatedEvent } = req.body;
+
+    await Event.findByIdAndUpdate(eventID, updatedEvent, {
+      runValidators: true,
+    });
+
+    res.send({ acknowledged: true, message: "Event updated successfully" });
+  } catch (err) {
+    console.log(err);
+    res.send({ acknowledged: false, message: "Sorry! Can not update event" });
+  }
+});
+// Edit event api ends
 
 app.get("/", (req, res) => {
   res.send("Server is running...");
