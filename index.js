@@ -60,6 +60,27 @@ const checkUser = (req, res, next) => {
   next();
 };
 
+const chechWhoDelete = async (req, res, next) => {
+  try {
+    const { email, eventID } = req.body;
+
+    const event = await Event.findById(eventID, "author");
+
+    if (event.author === email) {
+      return next();
+    }
+
+    const user = await User.findOne({ email }, "userType");
+    if (user.userType === "admin") {
+      return next();
+    }
+
+    return res.status(403).send({ message: "Unauthorized access" });
+  } catch (err) {
+    return res.status(403).send({ message: "Unauthorized access" });
+  }
+};
+
 // Save user api starts
 app.post("/users", async (req, res) => {
   try {
@@ -194,6 +215,26 @@ app.post("/edit-event", checkToken, checkUser, async (req, res) => {
   }
 });
 // Edit event api ends
+
+// Delete event api starts
+app.post(
+  "/delete-event",
+  checkToken,
+  checkUser,
+  chechWhoDelete,
+  async (req, res) => {
+    const { eventID } = req.body;
+
+    try {
+      await Event.findByIdAndDelete(eventID);
+      res.send({ acknowledged: true, message: "Event deleted successfully." });
+    } catch (err) {
+      console.log(err);
+      res.send({ acknowledged: false, message: "Sorry! Can not delete event" });
+    }
+  }
+);
+// Delete event api ends
 
 app.get("/", (req, res) => {
   res.send("Server is running...");
