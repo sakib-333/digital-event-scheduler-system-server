@@ -236,6 +236,23 @@ app.post(
 );
 // Delete event api ends
 
+// Count my events start
+app.post("/my-event-count", checkToken, checkUser, async (req, res) => {
+  const { email: author } = req.body;
+  try {
+    const total = await Event.countDocuments({ author }).exec();
+    const approved = await Event.countDocuments({
+      author,
+      status: "approved",
+    }).exec();
+
+    res.send({ acknowledged: true, total, approved });
+  } catch (err) {
+    res.send({ acknowledged: false, message: "Sorry no data found." });
+  }
+});
+// Count my events end
+
 app.get("/", (req, res) => {
   res.send("Server is running...");
 });
