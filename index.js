@@ -157,10 +157,11 @@ app.post("/user-type", checkToken, checkUser, async (req, res) => {
 // Add event api starts
 app.post("/add-event", checkToken, checkUser, async (req, res) => {
   try {
-    const { eventInfo } = req.body;
+    const { email, eventInfo } = req.body;
     const event = new Event({ ...eventInfo });
 
     await event.save();
+    await User.findOneAndUpdate({ email }, { $inc: { totalPosts: 1 } });
     res.send({ acknowledged: true, message: "Event saved successfully" });
   } catch (err) {
     console.log(err);
@@ -226,6 +227,11 @@ app.post(
     const { eventID } = req.body;
 
     try {
+      const { author } = await Event.findById(eventID, "author");
+      await User.findOneAndUpdate(
+        { email: author },
+        { $inc: { totalPosts: -1 } }
+      );
       await Event.findByIdAndDelete(eventID);
       res.send({ acknowledged: true, message: "Event deleted successfully." });
     } catch (err) {
