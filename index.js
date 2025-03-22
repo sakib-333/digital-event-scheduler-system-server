@@ -81,6 +81,16 @@ const chechWhoDelete = async (req, res, next) => {
   }
 };
 
+const checkAdmin = async (req, res, next) => {
+  const { email } = req.body;
+
+  const { userType } = await User.findOne({ email }, "userType").exec();
+  if (userType !== "admin") {
+    return res.status(403).send({ message: "Unauthorized access" });
+  }
+  next();
+};
+
 // Save user api starts
 app.post("/users", async (req, res) => {
   try {
@@ -258,6 +268,27 @@ app.post("/my-event-count", checkToken, checkUser, async (req, res) => {
   }
 });
 // Count my events end
+
+// Get all events for admin starts
+app.post(
+  "/get-all-events-for-admin",
+  checkToken,
+  checkUser,
+  checkAdmin,
+  async (req, res) => {
+    try {
+      const allEvents = await Event.find(
+        {},
+        "title category date location status"
+      ).exec();
+
+      res.send({ acknowledged: true, allEvents });
+    } catch (err) {
+      res.send({ acknowledged: false, message: "Sorry no data found." });
+    }
+  }
+);
+// Get all events for admin end
 
 app.get("/", (req, res) => {
   res.send("Server is running...");
