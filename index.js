@@ -277,10 +277,7 @@ app.post(
   checkAdmin,
   async (req, res) => {
     try {
-      const allEvents = await Event.find(
-        {},
-        "title category date location status"
-      ).exec();
+      const allEvents = await Event.find({}).exec();
 
       res.send({ acknowledged: true, allEvents });
     } catch (err) {
@@ -289,6 +286,41 @@ app.post(
   }
 );
 // Get all events for admin end
+
+// Get an event starts
+app.post("/event", checkToken, checkUser, checkAdmin, async (req, res) => {
+  const { eventID } = req.body;
+  try {
+    const event = await Event.findById(eventID).exec();
+
+    res.send({ acknowledged: true, event });
+  } catch (err) {
+    res.send({ acknowledged: false, event: {} });
+  }
+});
+// Get an event ends
+
+app.post(
+  "/event-approve",
+  checkToken,
+  checkUser,
+  checkAdmin,
+  async (req, res) => {
+    const { eventID } = req.body;
+    try {
+      const { author } = await Event.findById(eventID, "author");
+      await User.findOneAndUpdate({ email: author }, { $inc: { approved: 1 } });
+      await Event.findByIdAndUpdate(
+        eventID,
+        { status: "approved" },
+        { runValidators: true }
+      );
+      res.send({ acknowledged: true, message: "Event approved successfully" });
+    } catch (err) {
+      res.send({ acknowledged: false, message: "Can not approve event" });
+    }
+  }
+);
 
 app.get("/", (req, res) => {
   res.send("Server is running...");
