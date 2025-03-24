@@ -322,6 +322,40 @@ app.post(
   }
 );
 
+// Get all users api starts
+app.post(
+  "/get-all-users",
+  checkToken,
+  checkUser,
+  checkAdmin,
+  async (req, res) => {
+    try {
+      const users = await User.find({}, "email fullName userType").exec();
+
+      res.send({ acknowledged: true, users });
+    } catch (err) {
+      res.send({ acknowledged: false, users: [] });
+    }
+  }
+);
+// Get all users api ends
+
+// Make admin starts
+app.post("/make-admin", checkToken, checkUser, checkAdmin, async (req, res) => {
+  const { reqAdminEmail: email } = req.body;
+  try {
+    await User.findOneAndUpdate(
+      { email },
+      { userType: "admin" },
+      { new: true }
+    );
+    res.send({ acknowledged: true, message: `${email} is admin now.` });
+  } catch (err) {
+    res.send({ acknowledged: false, message: "Can not make admin" });
+  }
+});
+// Make admin end
+
 app.get("/", (req, res) => {
   res.send("Server is running...");
 });
