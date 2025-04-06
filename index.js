@@ -356,6 +356,26 @@ app.post("/make-admin", checkToken, checkUser, checkAdmin, async (req, res) => {
 });
 // Make admin end
 
+// Get all events start
+app.get("/get-all-events", async (req, res) => {
+  const { searchKey = "", category = "" } = req.query;
+
+  try {
+    const events = await Event.find(
+      {
+        title: { $regex: searchKey, $options: "i" },
+        category: { $regex: category },
+        status: "approved",
+      },
+      "photo title description category date location"
+    );
+    res.send({ acknowledged: true, events });
+  } catch (err) {
+    res.send({ acknowledged: false, message: "No data found" });
+  }
+});
+// Get all events ends
+
 app.get("/", (req, res) => {
   res.send("Server is running...");
 });
