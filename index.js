@@ -376,6 +376,19 @@ app.get("/get-all-events", async (req, res) => {
 });
 // Get all events ends
 
+// Get an event starts
+app.get("/get-event-by-id", async (req, res) => {
+  const { id = "" } = req.query;
+
+  try {
+    const event = await Event.findById(id);
+    res.send({ acknowledged: true, event });
+  } catch (err) {
+    res.send({ acknowledged: false, message: "No data found" });
+  }
+});
+// Get an event end
+
 app.get("/", (req, res) => {
   res.send("Server is running...");
 });
