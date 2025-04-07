@@ -368,7 +368,7 @@ app.get("/get-all-events", async (req, res) => {
         status: "approved",
       },
       "photo title description category date location"
-    );
+    ).exec();
     res.send({ acknowledged: true, events });
   } catch (err) {
     res.send({ acknowledged: false, message: "No data found" });
@@ -381,7 +381,7 @@ app.get("/get-event-by-id", async (req, res) => {
   const { id = "" } = req.query;
 
   try {
-    const event = await Event.findById(id);
+    const event = await Event.findById(id).exec();
     res.send({ acknowledged: true, event });
   } catch (err) {
     res.send({ acknowledged: false, message: "No data found" });
@@ -397,7 +397,10 @@ app.get("/up-coming-events", async (req, res) => {
     const upComingEvents = await Event.find({
       date: { $gt: today },
       status: "approved",
-    });
+    })
+      .sort({ date: -1 })
+      .limit(6)
+      .exec();
 
     res.send({ acknowledged: true, upComingEvents });
   } catch {
@@ -405,6 +408,22 @@ app.get("/up-coming-events", async (req, res) => {
   }
 });
 // Get up coming events end
+
+// Count total events starts
+app.get("/count-events", async (req, res) => {
+  const today = new Date();
+  try {
+    const totalEvents = await Event.countDocuments({ status: "approved" });
+    const completedEvents = await Event.countDocuments({
+      date: { $gt: today },
+      status: "approved",
+    });
+    res.send({ acknowledged: true, totalEvents, completedEvents });
+  } catch {
+    res.send({ acknowledged: false, message: "No data found" });
+  }
+});
+// Count total events ends
 
 app.get("/", (req, res) => {
   res.send("Server is running...");
