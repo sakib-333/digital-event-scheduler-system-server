@@ -389,6 +389,23 @@ app.get("/get-event-by-id", async (req, res) => {
 });
 // Get an event end
 
+// Get up coming events start
+app.get("/up-coming-events", async (req, res) => {
+  const today = new Date();
+
+  try {
+    const upComingEvents = await Event.find({
+      date: { $gt: today },
+      status: "approved",
+    });
+
+    res.send({ acknowledged: true, upComingEvents });
+  } catch {
+    res.send({ acknowledged: false, message: "No data found" });
+  }
+});
+// Get up coming events end
+
 app.get("/", (req, res) => {
   res.send("Server is running...");
 });
